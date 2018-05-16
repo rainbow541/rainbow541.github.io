@@ -271,6 +271,163 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://rainbow541.github.io/2018/05/17/pwn萌新的一次体验--0ctf babyheap/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rainbow541">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Rainbow541's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/17/pwn萌新的一次体验--0ctf babyheap/" itemprop="url">pwn萌新的一次体验--0ctf babyheap</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-17T06:41:09+08:00">
+                2018-05-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1,378
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  7
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h2><p>由于我有了新欢忘了旧爱，在自己web还处于菜鸡的情况下，去学了pwn。在自己菜菜的技术前提下，大胆尝试了下0ctf的一道pwn，写此文，纪念自己菜菜的pwn体验</p>
+<h2 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h2><p>题目是2018 0ctf的babyheap，64位，不是一道难题，但是也让我这个菜pwn写了很久。</p>
+<h2 id="漏洞"><a href="#漏洞" class="headerlink" title="漏洞"></a>漏洞</h2><p>这个题就是一个洞：<img src="https://upload-images.jianshu.io/upload_images/8148644-86b1ba5517a2b5ec.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""><br>这里允许一个字节的溢出，于是就可以覆盖到下一个chunk的size。<br>首先，我们要先leak出地址。这里由于题目分配内存使用的是calloc，这样会在分配内存时，将内存清零，所以，我们不能直接得到地址。于是我们必须换思路。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/05/17/pwn萌新的一次体验--0ctf babyheap/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://rainbow541.github.io/2018/05/16/搭xdebug环境/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1240,7 +1397,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-count">7</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1330,7 +1487,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">5.2k</span>
+    <span title="Site words total count">6.6k</span>
   
 </div>
 
