@@ -275,16 +275,6 @@
 
           
             
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/05/15/hello-world/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/05/15/hello-world/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
           
 
           
@@ -387,8 +377,8 @@
     var gitment = new Gitment({
       id: window.location.pathname,
       theme: myTheme,
-      owner: '',
-      repo: '',
+      owner: 'rainbow541',
+      repo: 'rainbow541.github.io',
       oauth: {
         client_id: 'ed36115102b8c7e52f62',
         client_secret: '77ab6a9abf0c36021f818b3ab4112447b8d99aab'
@@ -662,8 +652,8 @@
 <!-- LOCAL: You can save these files to your site and update links -->
     
         
-        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
-        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+        <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+        <script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
     
 <!-- END LOCAL -->
 
@@ -672,12 +662,10 @@
     
       <script type="text/javascript">
       function renderGitment(){
-        var gitment = new Gitmint({
+        var gitment = new Gitment({
             id: window.location.pathname, 
-            owner: 'rainbow541',
-            repo: 'rainbow541.github.io',
-            
-            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            owner: '',
+            repo: '',
             
             oauth: {
             
