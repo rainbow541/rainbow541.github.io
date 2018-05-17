@@ -86,17 +86,17 @@
 
 
 
-<meta name="description" content="#Tomcat CVE-2017-12615 补丁bypass 分析补丁原理当补丁打完之后，我们传入文件的时候，程序做了这样的处理1234protected File file(String name, boolean mustExist) &amp;#123;    File file = new File(base, name);    return validate(file, mustExist,">
+<meta name="description" content="分析补丁原理当补丁打完之后，我们传入文件的时候，程序做了这样的处理1234protected File file(String name, boolean mustExist) &amp;#123;    File file = new File(base, name);    return validate(file, mustExist, absoluteBase);&amp;#125; 调用了validat">
 <meta property="og:type" content="article">
-<meta property="og:title" content="CVE-2017-12615补丁bypass">
-<meta property="og:url" content="https://rainbow541.github.io/2017/12/09/Tomcat CVE-2017-12615 补丁bypass/index.html">
+<meta property="og:title" content="Tomcat CVE-2017-12615 补丁bypass">
+<meta property="og:url" content="https://rainbow541.github.io/2017/12/09/Tomcat/index.html">
 <meta property="og:site_name" content="Rainbow541&#39;s Blog">
-<meta property="og:description" content="#Tomcat CVE-2017-12615 补丁bypass 分析补丁原理当补丁打完之后，我们传入文件的时候，程序做了这样的处理1234protected File file(String name, boolean mustExist) &amp;#123;    File file = new File(base, name);    return validate(file, mustExist,">
+<meta property="og:description" content="分析补丁原理当补丁打完之后，我们传入文件的时候，程序做了这样的处理1234protected File file(String name, boolean mustExist) &amp;#123;    File file = new File(base, name);    return validate(file, mustExist, absoluteBase);&amp;#125; 调用了validat">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-05-17T07:25:52.206Z">
+<meta property="og:updated_time" content="2018-05-17T07:37:28.732Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="CVE-2017-12615补丁bypass">
-<meta name="twitter:description" content="#Tomcat CVE-2017-12615 补丁bypass 分析补丁原理当补丁打完之后，我们传入文件的时候，程序做了这样的处理1234protected File file(String name, boolean mustExist) &amp;#123;    File file = new File(base, name);    return validate(file, mustExist,">
+<meta name="twitter:title" content="Tomcat CVE-2017-12615 补丁bypass">
+<meta name="twitter:description" content="分析补丁原理当补丁打完之后，我们传入文件的时候，程序做了这样的处理1234protected File file(String name, boolean mustExist) &amp;#123;    File file = new File(base, name);    return validate(file, mustExist, absoluteBase);&amp;#125; 调用了validat">
 
 
 
@@ -126,13 +126,13 @@
 
 
 
-  <link rel="canonical" href="https://rainbow541.github.io/2017/12/09/Tomcat CVE-2017-12615 补丁bypass/"/>
+  <link rel="canonical" href="https://rainbow541.github.io/2017/12/09/Tomcat/"/>
 
 
 
 
 
-  <title>CVE-2017-12615补丁bypass | Rainbow541's Blog</title>
+  <title>Tomcat CVE-2017-12615 补丁bypass | Rainbow541's Blog</title>
   
 
 
@@ -239,7 +239,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://rainbow541.github.io/2017/12/09/Tomcat CVE-2017-12615 补丁bypass/">
+    <link itemprop="mainEntityOfPage" href="https://rainbow541.github.io/2017/12/09/Tomcat/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="rainbow541">
@@ -256,7 +256,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">CVE-2017-12615补丁bypass</h1>
+          <h1 class="post-title" itemprop="name headline">Tomcat CVE-2017-12615 补丁bypass</h1>
         
 
         <div class="post-meta">
@@ -305,7 +305,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  1,135
+                  1,128
                 </span>
               
 
@@ -330,8 +330,7 @@
       
 
       
-        <p>#Tomcat CVE-2017-12615 补丁bypass</p>
-<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><h3 id="补丁原理"><a href="#补丁原理" class="headerlink" title="补丁原理"></a>补丁原理</h3><p>当补丁打完之后，我们传入文件的时候，程序做了这样的处理<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">protected File file(String name, boolean mustExist) &#123;</span><br><span class="line">    File file = new File(base, name);</span><br><span class="line">    return validate(file, mustExist, absoluteBase);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+        <h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><h3 id="补丁原理"><a href="#补丁原理" class="headerlink" title="补丁原理"></a>补丁原理</h3><p>当补丁打完之后，我们传入文件的时候，程序做了这样的处理<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">protected File file(String name, boolean mustExist) &#123;</span><br><span class="line">    File file = new File(base, name);</span><br><span class="line">    return validate(file, mustExist, absoluteBase);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>调用了<code>validate</code>函数</p>
 <a id="more"></a>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">protected File validate(File file, boolean mustExist, String absoluteBase) &#123;</span><br><span class="line"></span><br><span class="line">    if (!mustExist || file.exists() &amp;&amp; file.canRead()) &#123; // !mustExist = true，进入 if</span><br><span class="line">        ...</span><br><span class="line">        try &#123;</span><br><span class="line">            canPath = file.getCanonicalPath();</span><br><span class="line">            // 此处，对路径进行规范化，调用的是 java.io.File 内的方法</span><br><span class="line">            // 之前的 Payload 中结尾为空格，那么这个方法就会去掉空格</span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        ...</span><br><span class="line">        if ((absoluteBase.length() &lt; absPath.length())</span><br><span class="line">            &amp;&amp; (absoluteBase.length() &lt; canPath.length())) &#123;</span><br><span class="line">            ...</span><br><span class="line">            // 判断规范化的路径以及传入的路径是否相等，由于 canPath 没有空格，return null</span><br><span class="line">            if (!canPath.equals(absPath))</span><br><span class="line">                return null;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
@@ -395,8 +394,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/12/01/搭xdebug环境/" rel="next" title="搭xdebug环境">
-                <i class="fa fa-chevron-left"></i> 搭xdebug环境
+              <a href="/2017/12/09/Typecho/" rel="next" title="Typecho Install.php 任意代码执行">
+                <i class="fa fa-chevron-left"></i> Typecho Install.php 任意代码执行
               </a>
             
           </div>
@@ -405,8 +404,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/12/09/XDCTF中脑洞的upload题/" rel="prev" title="XDCTF中脑洞的upload题">
-                XDCTF中脑洞的upload题 <i class="fa fa-chevron-right"></i>
+              <a href="/2017/12/09/PIL-ghostscript/" rel="prev" title="PIL利用ghostscript漏洞">
+                PIL利用ghostscript漏洞 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
