@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+<script>
+    (function(){
+        if(''){
+            if (prompt('请输入文章密码') !== ''){
+                alert('密码错误！');
+                history.back();
+            }
+        }
+    })();
+</script>
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="分析set在set.c中，包含了自定义的set.h文件。 set.hset.h中定义了一个结构体，组成单链，并声明了一些函数。这里需要注意的是，程序包含了stdarg.h，使得函数可以使用可变参数。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pl0编译器源码">
+<meta property="og:url" content="https://rainbow541.github.io/2018/06/29/pl0/index.html">
+<meta property="og:site_name" content="Rainbow541&#39;s Blog">
+<meta property="og:description" content="分析set在set.c中，包含了自定义的set.h文件。 set.hset.h中定义了一个结构体，组成单链，并声明了一些函数。这里需要注意的是，程序包含了stdarg.h，使得函数可以使用可变参数。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-06-29T03:37:34.166Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="pl0编译器源码">
+<meta name="twitter:description" content="分析set在set.c中，包含了自定义的set.h文件。 set.hset.h中定义了一个结构体，组成单链，并声明了一些函数。这里需要注意的是，程序包含了stdarg.h，使得函数可以使用可变参数。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://rainbow541.github.io/2018/06/29/pl0/"/>
+
+
+
+
+
+  <title>pl0编译器源码 | Rainbow541's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Rainbow541's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://rainbow541.github.io/2018/06/29/pl0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="rainbow541">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Rainbow541's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">pl0编译器源码</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-29T00:00:00+08:00">
+                2018-06-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3,247
+                </span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="分析set"><a href="#分析set" class="headerlink" title="分析set"></a>分析set</h2><p>在set.c中，包含了自定义的set.h文件。</p>
+<h3 id="set-h"><a href="#set-h" class="headerlink" title="set.h"></a>set.h</h3><p>set.h中定义了一个结构体，组成单链，并声明了一些函数。这里需要注意的是，程序包含了stdarg.h，使得函数可以使用可变参数。</p>
+<a id="more"></a>
+<h3 id="set-c"><a href="#set-c" class="headerlink" title="set.c"></a>set.c</h3><h4 id="setinsert"><a href="#setinsert" class="headerlink" title="setinsert"></a>setinsert</h4><p>功能比较简单，在链表中寻找第一个比传入数字大的数字的单元，并在其后插入一个单元，这个单元中包含函数形参中的数字。</p>
+<h4 id="createset"><a href="#createset" class="headerlink" title="createset"></a>createset</h4><p>建立链表，并将参数中的可变参数一一构成结构体，插入链表，然后返回该链表。</p>
+<h4 id="uniteset"><a href="#uniteset" class="headerlink" title="uniteset"></a>uniteset</h4><p>将两个链表按照从小到大的顺序合成为一个链表。</p>
+<h4 id="destroyset"><a href="#destroyset" class="headerlink" title="destroyset"></a>destroyset</h4><p>销毁传入链表。</p>
+<h4 id="inset"><a href="#inset" class="headerlink" title="inset"></a>inset</h4><p>判断传入的数字是否在链表内</p>
+<h4 id="showset"><a href="#showset" class="headerlink" title="showset"></a>showset</h4><p>打印链表中所有的数字</p>
+<h2 id="分析pl0"><a href="#分析pl0" class="headerlink" title="分析pl0"></a>分析pl0</h2><p>在pl0.c中，包含了set.h和pl0.h。</p>
+<h3 id="pl0-h"><a href="#pl0-h" class="headerlink" title="pl0.h"></a>pl0.h</h3><p>首先程序定义了四个枚举型变量，其中symtype放置了各种词法的记号名，idtype放置了id的类型，。。。。。。定义了</p>
+<h3 id="pl0-c"><a href="#pl0-c" class="headerlink" title="pl0.c"></a>pl0.c</h3><p>首先分析main函数。</p>
+<p>main函数首先打开了两个文件，一个作为输入文件，一个作为输出文件。之后建立null链表，判断符链表，逻辑控制符链表，。。。链表。并定义了一些变量，用来表示字符个数，长度，是否出错和当前指令索引等。设置当前的所读字符为’ ‘，完成一系列的准备工作后，main函数调用了getsym函数、block函数和interpret函数，先进行分析</p>
+<h4 id="getsym"><a href="#getsym" class="headerlink" title="getsym"></a>getsym</h4><h5 id="error"><a href="#error" class="headerlink" title="error"></a>error</h5><p>这个函数主要用来报错，参数是报错信息的index。</p>
+<p>将之前识别的字符全部清为空格，然后err变量加一。</p>
+<h5 id="getch"><a href="#getch" class="headerlink" title="getch"></a>getch</h5><p>这个函数主要用来漏掉空格，读取一个字符</p>
+<p>如果识别完一行，将行长和字符计数清零，将当前指令索引以十进制写入输出文件，并输出至DOS。之后将下一行加入line数组，并将其写入输出文件。如果未识别完一行，则将当前行数组的下一个字符赋值给当前正在读的字符。</p>
+<h5 id="getsym-1"><a href="#getsym-1" class="headerlink" title="getsym"></a>getsym</h5><p>函数功能是词法分析出一个词法单元。</p>
+<p>函数开始时规定，如果当前读入的字符为空格或者制表符，则调用getch函数，得到当前字符，之后判断字符类型，如下：</p>
+<h6 id="字母"><a href="#字母" class="headerlink" title="字母"></a>字母</h6><p>则将字母和数字全部放入a数组，之后将这个一串字符串与保留字比较。</p>
+<p>如果是保留字，则将当前识别的符号标示为该保留字。</p>
+<p>如果不是保留字，则将其识别为标识符。</p>
+<h6 id="数字"><a href="#数字" class="headerlink" title="数字"></a>数字</h6><p>将所有的数字接收入字符串，并将字符串转换为数字，并放入num变量中。如果字符串长度大于14，则报错，表明该数字太大。</p>
+<h6 id="冒号"><a href="#冒号" class="headerlink" title="冒号"></a>冒号</h6><p>再接收一个字符，如果下一个字符不为等号，则报错。</p>
+<p>如果是等号，则识别为赋值符号。并接收下一个符号。</p>
+<h6 id="大于号和小于号"><a href="#大于号和小于号" class="headerlink" title="大于号和小于号"></a>大于号和小于号</h6><p>判断其判断符的类型，并将其归类，方法与上述类似，不做赘述。并接收下一个字符。</p>
+<h6 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h6><p>主要是判断是否是运算符。过程和上面类似。</p>
+<p>之后，程序建立了一个含有小数点的链表，并将之前的判断符链表和逻辑控制符链表合并为一个链表，之后以这个新链表为参数调用block函数。下面分析block函数。</p>
+<h4 id="block"><a href="#block" class="headerlink" title="block"></a>block</h4><p>分析block之前也是一样，分析调用在其之前的函数：</p>
+<h5 id="gen"><a href="#gen" class="headerlink" title="gen"></a>gen</h5><p>这个函数是将指令索引加入code数组。</p>
+<p>首先判断指令索引是否大于最大值（500），如果大于则报错，程序太大，否则，加入数组</p>
+<h5 id="test"><a href="#test" class="headerlink" title="test"></a>test</h5><p>这个函数主要功能是检测错误并恢复。</p>
+<p>这个函数有三个参数，两个链表，一个错误编号。判断当前符号的类型是否在第一个链表，如果在则什么都不做，否则，打印s1和s2的内容，然后调用error 函数，报错一行，然后将两个链表合并，之后判断当前符号的类型是否在这个合并的链表中，如果在直接释放链表，如果不在，则一直向后分析，直到找到符合的字符。</p>
+<p>这个就是最简单的错误恢复策略”紧急方式”的恢复。</p>
+<h5 id="position"><a href="#position" class="headerlink" title="position"></a>position</h5><p>该函数的作用是寻找标识符在符号表的位置。</p>
+<h5 id="enter"><a href="#enter" class="headerlink" title="enter"></a>enter</h5><p>这个函数的主要功能是判断标识符的类型。</p>
+<p>先判断标识符是否已被定义，如果有则报错，否则将其加入符号表。之后判断标识符的类型，分为以下几类：</p>
+<h6 id="常量"><a href="#常量" class="headerlink" title="常量"></a>常量</h6><p>直接将数值加入符号表</p>
+<h6 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h6><p>则将其放入另一个表，将其层次和地址放入mask表。</p>
+<h6 id="保留字"><a href="#保留字" class="headerlink" title="保留字"></a>保留字</h6><p>将其放入mask表，与变量类似，但不放入地址。</p>
+<h5 id="constdeclaration"><a href="#constdeclaration" class="headerlink" title="constdeclaration"></a>constdeclaration</h5><p>这个函数的主要功能是识别常量。</p>
+<p>如果当前词法单元不是标识符则报错，否则判断其后其后是否有等号或者赋值号。若不是报错，再接收一个词法单元，判断类型是否为数字，若是则将其以常量递归调用自身，写入符号表。</p>
+<h5 id="vardeclaration"><a href="#vardeclaration" class="headerlink" title="vardeclaration"></a>vardeclaration</h5><p>这个函数的主要功能是识别变量。</p>
+<p>如果当前词法单元是标识符直接以变量放入符号表，否则报错。</p>
+<h5 id="listcode"><a href="#listcode" class="headerlink" title="listcode"></a>listcode</h5><p>这个函数用于打印代码的信息，并将其写入输出文件。</p>
+<h5 id="term"><a href="#term" class="headerlink" title="term"></a>term</h5><p>这个函数的主要功能是提供乘除语法分析。</p>
+<p>将乘除链表和传入链表合并，判断当前符号是否为乘或除，之后分别进行语法分析和执行翻译方案。</p>
+<h5 id="expression"><a href="#expression" class="headerlink" title="expression"></a>expression</h5><p>这个函数的主要功能是提供表达式语法分析。</p>
+<p>将加减链表和传入链表合并，判断当前符号是否为加或减，或者调用乘除的运算的语法分析。之后分别进行语法分析和执行翻译方案。</p>
+<h5 id="factor"><a href="#factor" class="headerlink" title="factor"></a>factor</h5><p>这个函数的主要功能是提供的因子语法分析。</p>
+<p>首先判断是否出错，也就是判断当前符号是否是标识符、数字或左括号。</p>
+<p>然后判断当前字符类型：</p>
+<h6 id="标识符"><a href="#标识符" class="headerlink" title="标识符"></a>标识符</h6><p>判断该标识符是否被定义，若未定义则报错。之后判断该标识符类型。</p>
+<p>若为常量，将其level设置为0，还有其数值送入code数组。</p>
+<p>若为变量，将其level还有其地址送入code数组。</p>
+<p>若为保留字，则报错。</p>
+<h6 id="数字-1"><a href="#数字-1" class="headerlink" title="数字"></a>数字</h6><p>判断其大小是否合法，之后将其和常量一个处理方法写入code表。</p>
+<h6 id="左括号"><a href="#左括号" class="headerlink" title="左括号"></a>左括号</h6><p>继续接收一个词法单元，将右括号链表和传入的链表合并。之后判断其是否符合expression的语法规则，最后必须以右括号结尾。</p>
+<h5 id="condition"><a href="#condition" class="headerlink" title="condition"></a>condition</h5><p>这个函数的主要功能是提供条件语法分析。</p>
+<p>首先判断当前词法单元类型是否为odd，若符合，则判断当前是否符合表达式语法规则。</p>
+<p>若不为odd，则判断条件的类型，并分类加入code数组</p>
+<h5 id="statement"><a href="#statement" class="headerlink" title="statement"></a>statement</h5><p>这个函数的主要功能是提供语句部分分析。</p>
+<p>识别当前词法符号类型：</p>
+<h6 id="标识符-1"><a href="#标识符-1" class="headerlink" title="标识符"></a>标识符</h6><p>首先判断其是否定义，之后判断其是否其类型是否为变量，若不为报错。然后接收下一个词法单元，判断其是否为赋值号，若不为报错，若为，则继续接收下一个词法单元，之后判断之后是否为表达式，若是，则将其写入code。</p>
+<h6 id="call"><a href="#call" class="headerlink" title="call"></a>call</h6><p>接收下一词法单元，判断其是否为标识符，进而判断其是否为程序名，若是将其写入code，否则报错。</p>
+<h6 id="if"><a href="#if" class="headerlink" title="if"></a>if</h6><p>接收下一词法单元，然后判断其是否符合条件语法，之后将其写入code表，之后判断其后是否为statement，之后将其的的索引也写入之前的code表中的偏移地址。</p>
+<h6 id="begin"><a href="#begin" class="headerlink" title="begin"></a>begin</h6><p>接收下一词法单元，然后判断其是否符合statement，然后判断其是否为;或者statement符号，若条件不为假则反复调用statement。最后以判读以end结尾。</p>
+<h6 id="while"><a href="#while" class="headerlink" title="while"></a>while</h6><p>接收下一词法单元，然后判断其是否符号条件的语法，之后，将其加入code，再之后接收do，在do后必须跟这statment。</p>
+<h5 id="block-1"><a href="#block-1" class="headerlink" title="block"></a>block</h5><p>这个函数的主要功能就是分析程序处理过程，也是开始符。</p>
+<p>将当前的指令索引的地址置０，之后将跳转的指令加入code作为开始的指令。</p>
+<p>之后如果判断到了声明的类型的词法单元，则接收一个词法单元判断其类型。</p>
+<p>若为常量标识const，则反复接收id，其中用逗号隔开，以分号结尾。</p>
+<p>若为变量标识var，则反复接收id，其中用逗号隔开，以分号结尾。</p>
+<p>之后识别过程标识procedure，接收一个id将其放入符号表，或者接收分号，调用自身，若之后字符为分号，检查之后的错误。</p>
+<p>最后检查错误，判断词法单元是否为语句开始。</p>
+<p>在此之后，函数开始做结尾处理，识别end或者分号。之后将其列出。</p>
+<p>之后分析interpret函数。</p>
+<h4 id="interpret"><a href="#interpret" class="headerlink" title="interpret"></a>interpret</h4><h5 id="base"><a href="#base" class="headerlink" title="base"></a>base</h5><p>这个函数单看不太理解，结合后面的使用，<code>stack[top + 1] = base(stack, b, i.l);</code>，这里的b是类似ebp的话，stack[b]就是放置着栈基址的值，也就是最后返回的是变量值。结合后面来看，特别是后面的cal部分，pl0的栈应该是以分层区别不同函数的栈，这个也就是这个level指的是不同的层次。那么这个函数就是用来计算相隔n层的栈的基址。</p>
+<h5 id="interpret-1"><a href="#interpret-1" class="headerlink" title="interpret"></a>interpret</h5><p>这个函数的主要作用就是翻译，对目标代码解释执行。（这一部分没怎么学过，有一部分是我猜的）。其中模仿c的函数调用，我猜测的pc就是下一条指令，汇编的eip,b就是ebp栈基址。</p>
+<p>判断code中每个数组单元的类型</p>
+<h6 id="LIT"><a href="#LIT" class="headerlink" title="LIT"></a>LIT</h6><p>a入栈（a中类型不一定，有偏移，也有常量等）。</p>
+<h6 id="OPR"><a href="#OPR" class="headerlink" title="OPR"></a>OPR</h6><p>若为双元运算则栈顶与次栈顶的内容进行运算，若为单元运算，则栈顶运算，结果放次栈顶。</p>
+<h6 id="LOD"><a href="#LOD" class="headerlink" title="LOD"></a>LOD</h6><p>变量的值入栈</p>
+<h6 id="STO"><a href="#STO" class="headerlink" title="STO"></a>STO</h6><p>将栈顶的值赋给变量</p>
+<h6 id="CAL"><a href="#CAL" class="headerlink" title="CAL"></a>CAL</h6><p>调用函数，入栈时，计算某一层基址，栈中先入该层的基址，再入上层基址，最后放入下一条指令，之后将b变成本层基址。</p>
+<h6 id="INT"><a href="#INT" class="headerlink" title="INT"></a>INT</h6><p>为栈开辟空间</p>
+<h6 id="JMP"><a href="#JMP" class="headerlink" title="JMP"></a>JMP</h6><p>跳转到指向的指令</p>
+<h6 id="JPC"><a href="#JPC" class="headerlink" title="JPC"></a>JPC</h6><p>若栈顶为零，则跳转到目标指令</p>
+<h4 id="main"><a href="#main" class="headerlink" title="main"></a>main</h4><p>至此，词法分析、语法分析和代码执行全部分析完毕。main函数就是打开输入、输出文件，然后对输入文件进行词法、语法分析生成.out文件，然后将其执行。</p>
+<h2 id="编译器过程分析"><a href="#编译器过程分析" class="headerlink" title="编译器过程分析"></a>编译器过程分析</h2><h3 id="词法分析"><a href="#词法分析" class="headerlink" title="词法分析"></a>词法分析</h3><p>我们可以通过代码得到以下正规式，改编译器就是通过这些正规式进行词法分析的。</p>
+<blockquote>
+<p>reword -&gt; BEGIN|END|IF|THEN|WHILE|DO|CALL|CONST|VAR|PROCEDURE</p>
+<p>op -&gt; +|-|*|/</p>
+<p>assign -&gt; :=|=</p>
+<p>relop -&gt; &lt;|&lt;=|&gt;|&gt;=|&lt;&gt;</p>
+<p>number -&gt; [0-9]+</p>
+<p>letter -&gt; [a-zA-z]+</p>
+<p>id -&gt; letter (letter|number)</p>
+<p>boundary -&gt; ,|.|;|(|)</p>
+</blockquote>
+<p>这就是每个词法单元的正规式。</p>
+<h3 id="语法分析"><a href="#语法分析" class="headerlink" title="语法分析"></a>语法分析</h3><p>我们可以通过代码得到以下文法:</p>
+<blockquote>
+<p>block -&gt; 声明 过程量声明 block statement|声明 statement</p>
+<p>expression -&gt; add term add term|term add term</p>
+<p>term -&gt; factor mul factor | factor</p>
+<p>factor -&gt; <strong>id</strong>|<strong>num</strong>|(expression)</p>
+<p>statement -&gt; if|call|do_while|set_value</p>
+<p>condition -&gt; <strong>ODD</strong> expression|expression relop expression</p>
+<p>if -&gt; <strong>IF</strong> condition <strong>THEN</strong> statement</p>
+<p>call -&gt; <strong>CALL</strong> <strong>id</strong></p>
+<p>do_while -&gt; <strong>WHILE</strong> condition <strong>DO</strong> statement </p>
+<p>set_value -&gt; <strong>id :=</strong> expression</p>
+<p>add -&gt; +|-</p>
+<p>mul -&gt; *|/</p>
+<p>relop -&gt; =|&lt;|&lt;=|&gt;|&gt;=</p>
+<p>常量声明 -&gt; <strong>CONST</strong> 量 <strong>;</strong></p>
+<p>变量声明 -&gt; <strong>VAR</strong> 量 <strong>;</strong></p>
+<p>过程量声明 -&gt; <strong>PROCEDURE</strong> 量 <strong>;</strong></p>
+<p>量 -&gt; <strong>id</strong>|<strong>id,</strong>量</p>
+<p>声明 -&gt; 常量声明|变量声明</p>
+</blockquote>
+<p>这是一个LL(1)文法，系统采用了递归下降的预测分析方法来分析语法。</p>
+<h2 id="添加功能"><a href="#添加功能" class="headerlink" title="添加功能"></a>添加功能</h2><h3 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h3><p>注释是编程的好帮手，但是整套源码里并未涉及对注释的识别，在词法分析时，可以直接将注释去掉。</p>
+<p>我们先建立一个测试的程序：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">var x,y;</span><br><span class="line">procedure fun;</span><br><span class="line">var a,b,c;</span><br><span class="line">begin</span><br><span class="line">a:=1;</span><br><span class="line">b:=2;</span><br><span class="line">c:=3;</span><br><span class="line">x:=a+b;</span><br><span class="line">end;</span><br><span class="line">begin</span><br><span class="line">call fun;</span><br><span class="line">end.</span><br></pre></td></tr></table></figure>
+<p>这是一个符合上述程序语法规范的程序，如果在其中加入注释，就会报错，现在我们在getch函数的while循环中加入这样的语句：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">while ( (!feof(infile)) // added &amp; modified by alex 01-02-09</span><br><span class="line">			    &amp;&amp; ((ch = getc(infile)) != &apos;\n&apos;))</span><br><span class="line">		&#123;</span><br><span class="line">			if(ch==&apos;#&apos;) // added by rainbow 06-21-18</span><br><span class="line">			&#123;</span><br><span class="line">				while((ch = getc(infile)) != &apos;\n&apos;);</span><br><span class="line">				break;</span><br><span class="line">			&#125;</span><br><span class="line">			fprintf(outfile, &quot;%c&quot;, ch);</span><br><span class="line">			printf(&quot;%c&quot;, ch);</span><br><span class="line">			line[++ll] = ch;</span><br><span class="line">		&#125; // while</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>感谢老爷打赏</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="https://upload-images.jianshu.io/upload_images/8148644-0fbf2b9b5972b6ed.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="rainbow541 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/20/pwn2/" rel="next" title="pwn萌新的再次体验--bctf baby_arena">
+                <i class="fa fa-chevron-left"></i> pwn萌新的再次体验--bctf baby_arena
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/29/Pwnhub Panda's  gift/" rel="prev" title="Pwnhub Panda's  gift">
+                Pwnhub Panda's  gift <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+  <div onclick="showGitment()" id="gitment_title" class="gitment_title">显示 Gitment 评论</div>
+  <div id="container" style="display:none"></div>
+  <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+  <script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+  <script>
+  const myTheme = {
+    render(state, instance) {
+      const container = document.createElement('div');
+      container.lang = "en-US";
+      container.className = 'gitment-container gitment-root-container';
+      container.appendChild(instance.renderHeader(state, instance));
+      container.appendChild(instance.renderEditor(state, instance));
+      container.appendChild(instance.renderComments(state, instance));
+      container.appendChild(instance.renderFooter(state, instance));
+      return container;
+    }
+  }
+  function showGitment() {
+    $("#gitment_title").attr("style", "display:none");
+    $("#container").attr("style", "").addClass("gitment_container");
+    var gitment = new Gitment({
+      id: window.location.pathname,
+      theme: myTheme,
+      owner: 'rainbow541',
+      repo: 'rainbow541.github.io',
+      oauth: {
+        client_id: 'ed36115102b8c7e52f62',
+        client_secret: '77ab6a9abf0c36021f818b3ab4112447b8d99aab'
+      }
+    });
+    gitment.render('container');
+  }
+  </script>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">rainbow541</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/rainbow541" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/wang-da-bai-50-39/activities" target="_blank" title="知乎">
+                      
+                        <i class="fa fa-fw fa-clone"></i>知乎</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://space.bilibili.com/36873342/#/" target="_blank" title="哔哩哔哩">
+                      
+                        <i class="fa fa-fw fa-bold"></i>哔哩哔哩</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.jianshu.com/u/786b0e642b55" target="_blank" title="简书">
+                      
+                        <i class="fa fa-fw fa-bookmark"></i>简书</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#分析set"><span class="nav-number">1.</span> <span class="nav-text">分析set</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#set-h"><span class="nav-number">1.1.</span> <span class="nav-text">set.h</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#set-c"><span class="nav-number">1.2.</span> <span class="nav-text">set.c</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#setinsert"><span class="nav-number">1.2.1.</span> <span class="nav-text">setinsert</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#createset"><span class="nav-number">1.2.2.</span> <span class="nav-text">createset</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#uniteset"><span class="nav-number">1.2.3.</span> <span class="nav-text">uniteset</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#destroyset"><span class="nav-number">1.2.4.</span> <span class="nav-text">destroyset</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#inset"><span class="nav-number">1.2.5.</span> <span class="nav-text">inset</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#showset"><span class="nav-number">1.2.6.</span> <span class="nav-text">showset</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析pl0"><span class="nav-number">2.</span> <span class="nav-text">分析pl0</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#pl0-h"><span class="nav-number">2.1.</span> <span class="nav-text">pl0.h</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pl0-c"><span class="nav-number">2.2.</span> <span class="nav-text">pl0.c</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#getsym"><span class="nav-number">2.2.1.</span> <span class="nav-text">getsym</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#error"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">error</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#getch"><span class="nav-number">2.2.1.2.</span> <span class="nav-text">getch</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#getsym-1"><span class="nav-number">2.2.1.3.</span> <span class="nav-text">getsym</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#字母"><span class="nav-number">2.2.1.3.1.</span> <span class="nav-text">字母</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#数字"><span class="nav-number">2.2.1.3.2.</span> <span class="nav-text">数字</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#冒号"><span class="nav-number">2.2.1.3.3.</span> <span class="nav-text">冒号</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#大于号和小于号"><span class="nav-number">2.2.1.3.4.</span> <span class="nav-text">大于号和小于号</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#其他"><span class="nav-number">2.2.1.3.5.</span> <span class="nav-text">其他</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#block"><span class="nav-number">2.2.2.</span> <span class="nav-text">block</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#gen"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">gen</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#test"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">test</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#position"><span class="nav-number">2.2.2.3.</span> <span class="nav-text">position</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#enter"><span class="nav-number">2.2.2.4.</span> <span class="nav-text">enter</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#常量"><span class="nav-number">2.2.2.4.1.</span> <span class="nav-text">常量</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#变量"><span class="nav-number">2.2.2.4.2.</span> <span class="nav-text">变量</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#保留字"><span class="nav-number">2.2.2.4.3.</span> <span class="nav-text">保留字</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#constdeclaration"><span class="nav-number">2.2.2.5.</span> <span class="nav-text">constdeclaration</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#vardeclaration"><span class="nav-number">2.2.2.6.</span> <span class="nav-text">vardeclaration</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#listcode"><span class="nav-number">2.2.2.7.</span> <span class="nav-text">listcode</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#term"><span class="nav-number">2.2.2.8.</span> <span class="nav-text">term</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#expression"><span class="nav-number">2.2.2.9.</span> <span class="nav-text">expression</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#factor"><span class="nav-number">2.2.2.10.</span> <span class="nav-text">factor</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#标识符"><span class="nav-number">2.2.2.10.1.</span> <span class="nav-text">标识符</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#数字-1"><span class="nav-number">2.2.2.10.2.</span> <span class="nav-text">数字</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#左括号"><span class="nav-number">2.2.2.10.3.</span> <span class="nav-text">左括号</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#condition"><span class="nav-number">2.2.2.11.</span> <span class="nav-text">condition</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#statement"><span class="nav-number">2.2.2.12.</span> <span class="nav-text">statement</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#标识符-1"><span class="nav-number">2.2.2.12.1.</span> <span class="nav-text">标识符</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#call"><span class="nav-number">2.2.2.12.2.</span> <span class="nav-text">call</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#if"><span class="nav-number">2.2.2.12.3.</span> <span class="nav-text">if</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#begin"><span class="nav-number">2.2.2.12.4.</span> <span class="nav-text">begin</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#while"><span class="nav-number">2.2.2.12.5.</span> <span class="nav-text">while</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#block-1"><span class="nav-number">2.2.2.13.</span> <span class="nav-text">block</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#interpret"><span class="nav-number">2.2.3.</span> <span class="nav-text">interpret</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#base"><span class="nav-number">2.2.3.1.</span> <span class="nav-text">base</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#interpret-1"><span class="nav-number">2.2.3.2.</span> <span class="nav-text">interpret</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#LIT"><span class="nav-number">2.2.3.2.1.</span> <span class="nav-text">LIT</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#OPR"><span class="nav-number">2.2.3.2.2.</span> <span class="nav-text">OPR</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#LOD"><span class="nav-number">2.2.3.2.3.</span> <span class="nav-text">LOD</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#STO"><span class="nav-number">2.2.3.2.4.</span> <span class="nav-text">STO</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#CAL"><span class="nav-number">2.2.3.2.5.</span> <span class="nav-text">CAL</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#INT"><span class="nav-number">2.2.3.2.6.</span> <span class="nav-text">INT</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#JMP"><span class="nav-number">2.2.3.2.7.</span> <span class="nav-text">JMP</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#JPC"><span class="nav-number">2.2.3.2.8.</span> <span class="nav-text">JPC</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#main"><span class="nav-number">2.2.4.</span> <span class="nav-text">main</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编译器过程分析"><span class="nav-number">3.</span> <span class="nav-text">编译器过程分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#词法分析"><span class="nav-number">3.1.</span> <span class="nav-text">词法分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#语法分析"><span class="nav-number">3.2.</span> <span class="nav-text">语法分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#添加功能"><span class="nav-number">4.</span> <span class="nav-text">添加功能</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#注释"><span class="nav-number">4.1.</span> <span class="nav-text">注释</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rainbow541</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">13.0k</span>
+  
+</div>
+
+
+ <!--  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>-->
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <!-- <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>-->
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+        <script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitment({
+            id: window.location.pathname, 
+            owner: '',
+            repo: '',
+            
+            oauth: {
+            
+            
+                client_secret: '77ab6a9abf0c36021f818b3ab4112447b8d99aab',
+            
+                client_id: 'ed36115102b8c7e52f62'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  undefined
+  <script type="text/javascript" src="http://tajs.qq.com/stats?sId=65845847" charset="UTF-8"></script>
+<script src="/live2dw/lib/L2Dwidget.min.js?0c58a1486de42ac6cc1c59c7d98ae887"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
+<script type="text/javascript" src="/js/src/love.js"></script>
